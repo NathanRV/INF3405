@@ -25,6 +25,6 @@ jobs:
         chmod +x TP1/Client/gradlew
         chmod +x TP1/Serveur/gradlew
     - name: Build Client with Gradle
-      run: ./TP1/Client/gradlew build
+      run: ./TP1/Client/gradlew -p /TP1/Client build
     - name: Build Serveur with Gradle
-      run: ./TP1/Serveur/gradlew build
+      run: ./TP1/Serveur/gradlew -p /TP1/Serveur build
