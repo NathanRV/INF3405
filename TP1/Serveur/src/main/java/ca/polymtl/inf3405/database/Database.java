@@ -2,10 +2,7 @@ package ca.polymtl.inf3405.database;
 
 import ca.polymtl.inf3405.Message;
 import ca.polymtl.inf3405.User;
-import ca.polymtl.inf3405.exceptions.DatabaseInsertionException;
-import ca.polymtl.inf3405.exceptions.MessageSizeException;
-import ca.polymtl.inf3405.exceptions.NoUserException;
-
+import ca.polymtl.inf3405.exceptions.*;
 import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -53,7 +50,7 @@ public class Database {
         return instance;
     }
 
-    public void insertNewMessage(Message m) throws DatabaseInsertionException {
+    public synchronized void insertNewMessage(Message m) throws DatabaseInsertionException {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:messenger.sqlite");
@@ -67,14 +64,15 @@ public class Database {
             throw new DatabaseInsertionException(e.getMessage());
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
-                throw new DatabaseInsertionException(e.getMessage());
+                e.printStackTrace();
             }
         }
     }
 
-    public void insertNewUser(User u) throws DatabaseInsertionException {
+    public synchronized void insertNewUser(User u) throws DatabaseInsertionException {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:messenger.sqlite");
@@ -87,14 +85,15 @@ public class Database {
             throw new DatabaseInsertionException(e.getMessage());
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
-                throw new DatabaseInsertionException(e.getMessage());
+                e.printStackTrace();
             }
         }
     }
 
-    public User getUser(String username) throws NoUserException {
+    public synchronized User getUser(String username) throws NoUserException {
         Connection connection = null;
         String passwordHash = "";
 
@@ -113,7 +112,8 @@ public class Database {
             e.printStackTrace();
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -121,7 +121,7 @@ public class Database {
         return new User(username, passwordHash);
     }
 
-    public List<Message> getLastMessages(Integer numberOfMessages) {
+    public synchronized List<Message> getLastMessages(Integer numberOfMessages) {
         Connection connection = null;
         List<Message> messages = new ArrayList<>(numberOfMessages);
 
@@ -146,7 +146,8 @@ public class Database {
             e.printStackTrace();
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
