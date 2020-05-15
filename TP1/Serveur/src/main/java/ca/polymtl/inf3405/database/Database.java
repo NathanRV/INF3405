@@ -64,7 +64,8 @@ public class Database {
             throw new DatabaseInsertionException(e.getMessage());
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -84,7 +85,8 @@ public class Database {
             throw new DatabaseInsertionException(e.getMessage());
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -110,7 +112,8 @@ public class Database {
             e.printStackTrace();
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -143,7 +146,8 @@ public class Database {
             e.printStackTrace();
         } finally {
             try {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
