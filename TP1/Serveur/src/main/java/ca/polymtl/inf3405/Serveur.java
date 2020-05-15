@@ -1,4 +1,4 @@
-package serveur;
+package ca.polymtl.inf3405;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
