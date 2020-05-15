@@ -1,4 +1,10 @@
-package serveur;
+package ca.polymtl.inf3405.database;
+
+import ca.polymtl.inf3405.Message;
+import ca.polymtl.inf3405.User;
+import ca.polymtl.inf3405.exceptions.DatabaseInsertionException;
+import ca.polymtl.inf3405.exceptions.MessageSizeException;
+import ca.polymtl.inf3405.exceptions.NoUserException;
 
 import java.sql.*;
 import java.time.Instant;
@@ -12,11 +18,12 @@ public class Database {
     private static final String createMessagesQuery = "CREATE TABLE IF NOT EXISTS messages (" +
             "message_id INTEGER PRIMARY KEY, sender_name TEXT NOT NULL, sender_ip TEXT NOT NULL," +
             "sender_port INTEGER, time TEXT NOT NULL, message TEXT NOT NULL )";
+    private static final String path = "messenger.sqlite";
 
     private Database() {
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:messenger.sqlite");
+            connection = DriverManager.getConnection("jdbc:sqlite:"+path);
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
 

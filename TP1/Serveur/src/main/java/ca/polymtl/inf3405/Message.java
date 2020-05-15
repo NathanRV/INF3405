@@ -1,4 +1,6 @@
-package serveur;
+package ca.polymtl.inf3405;
+
+import ca.polymtl.inf3405.exceptions.MessageSizeException;
 
 import java.net.Socket;
 import java.time.Instant;

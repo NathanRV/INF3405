@@ -3,10 +3,12 @@ package TestServeur;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.polymtl.inf3405.database.Database;
+import ca.polymtl.inf3405.Message;
+import ca.polymtl.inf3405.exceptions.NoUserException;
+import ca.polymtl.inf3405.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
-
-import serveur.*;
 
 import java.time.Instant;
 import java.util.List;

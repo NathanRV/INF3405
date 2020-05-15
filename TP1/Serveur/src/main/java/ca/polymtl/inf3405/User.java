@@ -1,4 +1,4 @@
-package serveur;
+package ca.polymtl.inf3405;
 
 import de.rtner.security.auth.spi.SimplePBKDF2;
 
