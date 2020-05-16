@@ -1,5 +1,7 @@
-package ca.polymtl.inf3405.requestEncoding;
+package ca.polymtl.inf3405.server.requestEncoding;
 
+import ca.polymtl.inf3405.server.request.Request;
+import ca.polymtl.inf3405.server.request.Requests;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -12,7 +14,7 @@ public class RequestDecoder {
 
     public RequestDecoder() {}
 
-    public Request decodePacket(byte[] r) {
+    public Request decodeRequest(byte[] r) {
         ByteBuffer buffer = ByteBuffer.wrap(r);
 
         int size = buffer.getInt();

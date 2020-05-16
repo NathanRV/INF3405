@@ -1,37 +1,40 @@
-package ca.polymtl.inf3405.requestEncoding;
+package ca.polymtl.inf3405.server.responseEncoding;
 
+import ca.polymtl.inf3405.server.response.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class RequestEncoder {
-    public RequestEncoder() {}
+public class ResponseEncoder {
+    public ResponseEncoder() {}
 
-    public byte[] encodePacket(Request r) {
-        byte request = encodeRequest(r.getRequest());
-        byte[] token = encodeToken(r.getToken());
+    public byte[] encodeResponse(Response r) {
+        byte response = encodeResponse(r.getResponse());
         byte[] payload = encodeString(r.getPayload());
-        int size = Byte.BYTES + token.length + payload.length + Integer.BYTES;
+        int size = Byte.BYTES + payload.length + Integer.BYTES;
 
         ByteBuffer buffer = ByteBuffer.allocate(size);
         buffer.putInt(size);
-        buffer.put(request);
-        buffer.put(token);
+        buffer.put(response);
         buffer.put(payload);
 
         return buffer.array();
     }
 
-    private byte encodeRequest(Requests r) {
+    private byte encodeResponse (Responses r) {
         switch (r) {
-            case LOG_IN:
+            case OK:
                 return 0x1;
-            case LOG_OUT:
+            case AUTHENTICATED:
                 return 0x2;
-            case SEND_MESSAGE:
+            case USER_CREATED:
                 return 0x3;
-            case RECEIVE_MESSAGE:
+            case WRONG_PASSWORD:
                 return 0x4;
+            case WRONG_REQUEST:
+                return 0x5;
+            case EXPIRED_TOKEN:
+                return 0x6;
             default:
                 throw new IllegalStateException("Unexpected value: " + r);
         }
@@ -39,9 +42,5 @@ public class RequestEncoder {
 
     private byte[] encodeString(String s) {
         return s.getBytes(StandardCharsets.UTF_8);
-    }
-
-    private byte[] encodeToken(String t) {
-        return Base64.getDecoder().decode(t);
     }
 }

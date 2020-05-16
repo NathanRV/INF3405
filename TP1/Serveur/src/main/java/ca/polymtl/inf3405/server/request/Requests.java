@@ -1,4 +1,4 @@
-package ca.polymtl.inf3405.requestEncoding;
+package ca.polymtl.inf3405.server.request;
 
 public enum Requests {
     LOG_IN,
