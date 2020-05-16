@@ -1,7 +1,7 @@
-package ca.polymtl.inf3405.server.requestEncoding;
+package ca.polymtl.inf3405.protocol.requestEncoding;
 
-import ca.polymtl.inf3405.server.request.Request;
-import ca.polymtl.inf3405.server.request.Requests;
+import ca.polymtl.inf3405.protocol.request.Request;
+import ca.polymtl.inf3405.protocol.request.Requests;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
