@@ -2,6 +2,8 @@ package ca.polymtl.inf3405.protocol.requestEncoding;
 
 import ca.polymtl.inf3405.protocol.request.Request;
 import ca.polymtl.inf3405.protocol.request.Requests;
+import ca.polymtl.inf3405.server.Message;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -32,7 +34,7 @@ public class RequestEncoder {
                 return 0x2;
             case SEND_MESSAGE:
                 return 0x3;
-            case RECEIVE_MESSAGE:
+            case REQUEST_NEW_MESSAGES:
                 return 0x4;
             default:
                 throw new IllegalStateException("Unexpected value: " + r);
@@ -45,5 +47,14 @@ public class RequestEncoder {
 
     private byte[] encodeToken(String t) {
         return Base64.getDecoder().decode(t);
+    }
+
+    public String encodeUserNameAndPassword (String userName, String password) {
+        return userName + "\n" + password;
+    }
+
+    public String encodeMessage(Message m) {
+        return String.join("\n", m.getSenderName(), m.getSenderIp(), m.getSenderPort().toString(),
+                m.getTime().toString(), m.getMessage());
     }
 }

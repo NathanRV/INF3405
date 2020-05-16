@@ -6,5 +6,6 @@ public enum Responses {
     USER_CREATED,
     WRONG_PASSWORD,
     WRONG_REQUEST,
-    EXPIRED_TOKEN
+    WRONG_TOKEN,
+    ERROR
 }

@@ -1,9 +1,13 @@
 package ca.polymtl.inf3405.protocol.requestEncoding;
 
+import ca.polymtl.inf3405.exceptions.MessageSizeException;
 import ca.polymtl.inf3405.protocol.request.Request;
 import ca.polymtl.inf3405.protocol.request.Requests;
+import ca.polymtl.inf3405.server.Message;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Base64;
 
 public class RequestDecoder {
@@ -40,7 +44,7 @@ public class RequestDecoder {
             case 0x3:
                 return Requests.SEND_MESSAGE;
             case 0x4:
-                return Requests.RECEIVE_MESSAGE;
+                return Requests.REQUEST_NEW_MESSAGES;
             default:
                 throw new IllegalStateException("Unexpected value: " + r);
         }
@@ -52,5 +56,18 @@ public class RequestDecoder {
 
     private String decodeToken(byte[] t) {
         return Base64.getEncoder().encodeToString(t);
+    }
+
+    public Message decodeMessage(String s) throws MessageSizeException {
+        int SENDER_NAME = 0;
+        int SENDER_IP = 1;
+        int SENDER_PORT = 2;
+        int TIME = 3;
+        int MESSAGE = 4;
+        int N_OF_FIELDS = 5;
+
+        String[] m = s.split("\n", N_OF_FIELDS);
+        return new Message(m[SENDER_NAME], m[SENDER_IP], Integer.parseInt(m[SENDER_PORT]), Instant.parse(m[TIME]),
+                m[MESSAGE]);
     }
 }

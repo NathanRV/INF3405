@@ -32,8 +32,10 @@ public class ResponseEncoder {
                 return 0x4;
             case WRONG_REQUEST:
                 return 0x5;
-            case EXPIRED_TOKEN:
+            case WRONG_TOKEN:
                 return 0x6;
+            case ERROR:
+                return 0x7;
             default:
                 throw new IllegalStateException("Unexpected value: " + r);
         }
