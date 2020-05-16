@@ -1,4 +1,4 @@
-package ca.polymtl.inf3405;
+package ca.polymtl.inf3405.server;
 
 import ca.polymtl.inf3405.exceptions.MessageSizeException;
 
