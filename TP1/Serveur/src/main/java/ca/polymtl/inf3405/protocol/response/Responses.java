@@ -1,4 +1,4 @@
-package ca.polymtl.inf3405.server.response;
+package ca.polymtl.inf3405.protocol.response;
 
 public enum Responses {
     OK,

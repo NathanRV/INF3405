@@ -1,9 +1,8 @@
-package ca.polymtl.inf3405.server.responseEncoding;
+package ca.polymtl.inf3405.protocol.responseEncoding;
 
-import ca.polymtl.inf3405.server.response.*;
+import ca.polymtl.inf3405.protocol.response.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class ResponseEncoder {
     public ResponseEncoder() {}

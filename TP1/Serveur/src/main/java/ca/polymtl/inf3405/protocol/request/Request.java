@@ -1,4 +1,4 @@
-package ca.polymtl.inf3405.server.request;
+package ca.polymtl.inf3405.protocol.request;
 
 public class Request {
     private final Requests request;

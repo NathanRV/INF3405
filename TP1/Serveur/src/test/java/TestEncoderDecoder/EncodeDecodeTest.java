@@ -1,12 +1,12 @@
 package TestEncoderDecoder;
 
-import ca.polymtl.inf3405.server.requestEncoding.*;
-import ca.polymtl.inf3405.server.request.Request;
-import ca.polymtl.inf3405.server.request.Requests;
-import ca.polymtl.inf3405.server.response.Response;
-import ca.polymtl.inf3405.server.response.Responses;
-import ca.polymtl.inf3405.server.responseEncoding.ResponseDecoder;
-import ca.polymtl.inf3405.server.responseEncoding.ResponseEncoder;
+import ca.polymtl.inf3405.protocol.requestEncoding.*;
+import ca.polymtl.inf3405.protocol.request.Request;
+import ca.polymtl.inf3405.protocol.request.Requests;
+import ca.polymtl.inf3405.protocol.response.Response;
+import ca.polymtl.inf3405.protocol.response.Responses;
+import ca.polymtl.inf3405.protocol.responseEncoding.ResponseDecoder;
+import ca.polymtl.inf3405.protocol.responseEncoding.ResponseEncoder;
 import org.junit.jupiter.api.Test;
 
 import java.security.SecureRandom;
