@@ -38,7 +38,9 @@ public class ResponseDecoder {
             case 0x5:
                 return Responses.WRONG_REQUEST;
             case 0x6:
-                return Responses.EXPIRED_TOKEN;
+                return Responses.WRONG_TOKEN;
+            case 0x7:
+                return Responses.ERROR;
             default:
                 throw new IllegalStateException("Unexpected value: " + r);
         }
