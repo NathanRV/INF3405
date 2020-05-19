@@ -1,8 +1,8 @@
-package ca.polymtl.inf3405.server;
+package ca.polymtl.inf3405.protocol;
 
 import ca.polymtl.inf3405.exceptions.MessageSizeException;
+import com.google.gson.Gson;
 
-import java.net.Socket;
 import java.time.Instant;
 
 final public class Message {
@@ -13,18 +13,6 @@ final public class Message {
     private final String message;
 
     private static final int MAXIMUM_SIZE = 200;
-
-    public Message(User user, Socket clientSocket, String message) throws MessageSizeException {
-        if (message.length() > MAXIMUM_SIZE) {
-            throw new MessageSizeException("La taille maximale du message est de 200 caractères.");
-        }
-
-        this.senderName = user.getUserName();
-        this.senderIp = clientSocket.getRemoteSocketAddress().toString();
-        this.senderPort = clientSocket.getPort();
-        this.time = Instant.now();
-        this.message = message;
-    }
 
     public Message(String senderName, String senderIp, Integer senderPort, Instant time, String message)
             throws MessageSizeException {
@@ -58,4 +46,16 @@ final public class Message {
     public String getMessage() {
         return message;
     }
+
+    public String encodeMessage() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+
+    public static Message decodeMessage(String string) {
+        Gson gson = new Gson();
+        return gson.fromJson(string, Message.class);
+    }
+
+
 }
