@@ -1,6 +1,6 @@
 package ca.polymtl.inf3405.database;
 
-import ca.polymtl.inf3405.server.Message;
+import ca.polymtl.inf3405.protocol.Message;
 import ca.polymtl.inf3405.server.User;
 import ca.polymtl.inf3405.exceptions.*;
 import java.sql.*;
