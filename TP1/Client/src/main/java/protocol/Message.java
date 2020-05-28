@@ -1,8 +1,8 @@
-package ca.polymtl.inf3405.protocol;
+package protocol;
 
-import ca.polymtl.inf3405.exceptions.MessageSizeException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import exceptions.MessageSizeException;
 
 import java.time.Instant;
 
@@ -60,6 +60,10 @@ final public class Message {
         } catch (JsonSyntaxException e) {
             return null;
         }
+    }
+
+    public String toConsole() {
+        return "["+senderName+"]: " + message;
     }
 
 }
