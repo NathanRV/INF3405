@@ -221,21 +221,17 @@ public class Client {
         public void run() {
             while (running) {
                 try {
+                    ServerSocket listeningSocket = new ServerSocket(0);
+                    int listeningPort = listeningSocket.getLocalPort();
                     Socket currentServerSocket = listeningSocket.accept();
                     DataInputStream inputStream = new DataInputStream(currentServerSocket.getInputStream());
                     Message message = Message.decodeMessage(inputStream.readUTF());
                     if (message != null) {
                         System.out.println(message.toConsole());
                     }
+                    listeningSocket.close();
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    try {
-                        listeningSocket.close();
-                        listeningSocket = new ServerSocket(listeningPort);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         }
