@@ -115,8 +115,15 @@ public class Client {
         }
     }
 
-            Request resquest = new Request("GET_MESSAGES", token, new HashMap<>());
-            serverOutputStream.writeUTF(resquest.encodeRequest());
+    private void logout(BufferedReader reader, String serverAddress, int serverPort) {
+        Map<String, String> requestPayload = Map.of();
+        Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "LOG_OUT", requestPayload);
+        String username = responsePayload.get("username");
+        if (username != null) {
+            token = "";
+            System.out.print("Logout avec succes: " + username);
+        }
+    }
 
             Response response = Response.decodeResponse(serverInputStream.readUTF());
             int size = Integer.parseInt(response.getPayload().get("size"));
