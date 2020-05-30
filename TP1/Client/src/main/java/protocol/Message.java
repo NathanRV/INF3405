@@ -15,7 +15,7 @@ final public class Message {
 
     private static final int MAXIMUM_SIZE = 200;
 
-    public Message(String senderName, String senderIp, Integer senderPort, Instant time, String message)
+    public Message(String senderName, String senderIp, Integer senderPort, String message)
             throws MessageSizeException {
         if (message.length() > MAXIMUM_SIZE) {
             throw new MessageSizeException("La taille maximale du message est de 200 caractères.");
@@ -24,7 +24,7 @@ final public class Message {
         this.senderName = senderName;
         this.senderIp = senderIp;
         this.senderPort = senderPort;
-        this.time = time.toString();
+        this.time = Instant.now().toString();
         this.message = message;
     }
 
