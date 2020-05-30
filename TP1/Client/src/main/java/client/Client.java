@@ -192,31 +192,21 @@ public class Client {
         }
 
         public void run() {
-            String inputMessage;
-            Message message;
-            Request request;
-
-            while (true) {
-                try {
-                    inputMessage = userIn.readLine();
-                    serverSocket = new Socket(serverAddress, serverPort);
-                    DataOutputStream outputStream = new DataOutputStream(serverSocket.getOutputStream());
-                    DataInputStream inputStream = new DataInputStream(serverSocket.getInputStream());
-
-                    try {
-                        message = new Message(user, serverSocket.getInetAddress().toString(), serverSocket.getLocalPort(),
-                                Instant.now(), inputMessage);
-                        request = new Request("NEW_MESSAGE", token, Map.of("Message", message.encodeMessage()));
-                        outputStream.writeUTF(request.encodeRequest());
-                        Response response = Response.decodeResponse(inputStream.readUTF());
-                    } catch (MessageSizeException e) {
-                        System.out.println("Erreur: la taille du message doit être de 200 caractères ou moins.");
-                    } finally {
-                        serverSocket.close();
-                    }
-                } catch (IOException e) {
-                    System.out.println("Erreur dans l'envoi du message! Déconnexion.");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("Nouveau message:");
+            try {
+                String inputMessage = reader.readLine();
+                Message message = new Message(username, serverAddress, serverPort, inputMessage);
+                Map<String, String> requestPayload = Map.of("Message", message.encodeMessage());
+                Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "NEW_MESSAGE", requestPayload);
+                String username = responsePayload.get("username");
+                if (username != null) {
+                    System.out.println("Message envoye avec succes!");
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (MessageSizeException e) {
+                System.out.println("Erreur: la taille du message doit être de 200 caractères ou moins.");
             }
         }
     }
