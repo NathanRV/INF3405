@@ -240,11 +240,4 @@ public class Client {
             running = false;
         }
     }
-
-
-    public static void main(String[] args) throws Exception
-    {
-        Client client = new Client();
-        client.run();
-    }
 }
