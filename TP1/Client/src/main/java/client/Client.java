@@ -125,17 +125,60 @@ public class Client {
         }
     }
 
-            Response response = Response.decodeResponse(serverInputStream.readUTF());
-            int size = Integer.parseInt(response.getPayload().get("size"));
-            Message message;
-            for (int i = 1; i <= size; ++i) {
-                message = Message.decodeMessage(response.getPayload().get(Integer.toString(size-i)));
-                if (message != null) {
-                    System.out.println(message.toConsole());
-                }
+    private void printLastMessages(BufferedReader reader, String serverAddress, int serverPort) {
+        Map<String, String> requestPayload = Map.of();
+        Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "GET_MESSAGES", requestPayload);
+        int size = Integer.parseInt(responsePayload.get("size"));
+        Message message;
+        for (int i = 1; i <= size; ++i) {
+            message = Message.decodeMessage(responsePayload.get(Integer.toString(size - i)));
+            if (message != null) {
+                System.out.println(message.toConsole());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+    }
+
+    private boolean selectAction(BufferedReader reader, String serverAddress, int serverPort) {
+        if (token.matches("")) {
+            login(reader, serverAddress, serverPort);
+            printLastMessages(reader, serverAddress, serverPort);
+            ReadMessage messageListener = new ReadMessage();
+            messageListener.start();
+            return false;
+        } else {
+            Map<String, Runnable> actionMap = Map.of(
+                    "a", () -> new SendMessage(serverAddress, serverPort).start(),
+                    "b", () -> logout(reader, serverAddress, serverPort)
+            );
+            System.out.print(
+                    "Veuillez selectionner une action\n" +
+                            "   a) Nouveau message\n" +
+                            "   b) Logout\n" +
+                            "   c) Fermer" +
+                            "Selection: "
+            );
+            try {
+                String action = reader.readLine();
+                if (action.matches("c")) {
+                    return true;
+                } else {
+                    actionMap.get(action).run();
+                    return false;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return true;
+            }
+        }
+    }
+
+    public void run() {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String serverAddress = validateIP(reader);
+        int serverPort = validatePort(reader);
+        boolean quit = false;
+        while (!quit) {
+            quit = selectAction(reader, serverAddress, serverPort);
         }
     }
 
