@@ -183,10 +183,12 @@ public class Client {
     }
 
     private class SendMessage extends Thread {
-        BufferedReader userIn;
+        String serverAddress;
+        int serverPort;
 
-        public SendMessage() {
-            userIn = new BufferedReader(new InputStreamReader(System.in));
+        public SendMessage(String serverAddress, int serverPort) {
+            this.serverAddress = serverAddress;
+            this.serverPort = serverPort;
         }
 
         public void run() {
