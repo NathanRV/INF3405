@@ -24,30 +24,6 @@ public class Client {
         client.run();
     }
 
-    private String getUser(BufferedReader reader) {
-        System.out.print("Veuillez entrer le nom d'utilisateur : ");
-        String username;
-        try {
-            username = reader.readLine();
-            return username;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    private String getPassword(BufferedReader reader) {
-        System.out.print("Veuillez entrer le mot de passe : ");
-        String password;
-        try {
-            password = reader.readLine();
-            return password;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
     private String validateIP(BufferedReader reader) {
         System.out.print("Veuillez entrez l'adresse IP du serveur : ");
         String serverAddress = "";
