@@ -69,37 +69,28 @@ public class Client {
         return serverPort;
     }
 
-    private void connectToServer(String username, String password, int listeningPort, BufferedReader reader) {
-        boolean connected = false;
+    private Map<String, String> sendRequest(String serverAddress, int serverPort, String requestID, Map<String, String> payload) {
         try {
-            while (!connected) {
-                serverSocket = new Socket(serverAddress, serverPort);
-                DataOutputStream serverOutputStream = new DataOutputStream(serverSocket.getOutputStream());
-                serverOutputStream.writeUTF(new Request("LOG_IN", "", Map.of("username", username,
-                        "password", password, "listening_port", Integer.toString(listeningPort))).encodeRequest());
-
-                DataInputStream serverInputStream = new DataInputStream(serverSocket.getInputStream());
-                Response response = Response.decodeResponse(serverInputStream.readUTF());
-
-                if (response.getResponse().equals("OK")) {
-                    String token = response.getPayload().get("Token");
-                    if (token != null) {
-                        this.token = token;
-                        connected = true;
-                    }
-                    serverSocket.close();
-                }
-                else {
-                    System.out.println("Error: " + response.getPayload().get("Type"));
-                    serverSocket.close();
-                    serverSocket = new Socket(serverAddress, serverPort);
-                    username = getUser(reader);
-                    password = getPassword(reader);
-                }
+            Socket socket = new Socket(serverAddress, serverPort);
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+            DataInputStream inputStream = new DataInputStream(socket.getInputStream());
+            Request request = new Request(
+                    requestID,
+                    token,
+                    payload
+            );
+            outputStream.writeUTF(request.encodeRequest());
+            socket.close();
+            Response response = Response.decodeResponse(inputStream.readUTF());
+            if (response.getResponse().equals("OK")) {
+                return response.getPayload();
+            } else {
+                System.out.println("Error: " + response.getPayload().get("Type"));
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        return new HashMap<>();
     }
 
     private void printLastMessages() {
