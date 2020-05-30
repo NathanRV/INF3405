@@ -26,9 +26,16 @@ public class Client {
             listeningPort = listeningSocket.getLocalPort();
             listeningSocket.setReuseAddress(true);
             serverSocket = null;
-        } catch (Exception e) {
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Client client = new Client();
+        client.run();
     }
 
     private String getUser(BufferedReader reader) {
@@ -37,10 +44,10 @@ public class Client {
         try {
             username = reader.readLine();
             return username;
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
+            return "";
         }
-        return "";
     }
 
     private String getPassword(BufferedReader reader) {
@@ -49,10 +56,10 @@ public class Client {
         try {
             password = reader.readLine();
             return password;
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
+            return "";
         }
-        return "";
     }
 
     private String validateIP(BufferedReader reader) {
@@ -64,14 +71,14 @@ public class Client {
         while (!valid) {
             try {
                 serverAddress = reader.readLine();
-            }
-            catch(IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
-            }
-            if (serverAddress.matches(IP_PATTERN)) {
-                valid = true;
-            } else {
-                System.out.print("Adresse IP entree invalide! Veuillez entre une adresse du format XXX.XXX.XXX.XXX : ");
+            } finally {
+                if (serverAddress.matches(IP_PATTERN)) {
+                    valid = true;
+                } else {
+                    System.out.print("Adresse IP entree invalide! Veuillez entre une adresse du format XXX.XXX.XXX.XXX : ");
+                }
             }
         }
         return serverAddress;
@@ -81,18 +88,19 @@ public class Client {
         System.out.print("Veuillez entrez le port d'ecoute du serveur : ");
         int serverPort = 0;
         boolean valid = false;
-        while (!valid)
-        {
+        while (!valid) {
             try {
                 serverPort = Integer.parseInt(reader.readLine());
-            }
-            catch(Exception e) {
+            } catch (NumberFormatException e) {
                 serverPort = 0;
-            }
-            if (serverPort >= 5000 && serverPort<=5050) {
-                valid = true;
-            } else {
-                System.out.print("Port invalide! (Veuillez entrez un nombre entre 5000 et 5050) ");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (serverPort >= 5000 && serverPort <= 5050) {
+                    valid = true;
+                } else {
+                    System.out.print("Port invalide! (Veuillez entrez un nombre entre 5000 et 5050) ");
+                }
             }
         }
 
@@ -155,24 +163,6 @@ public class Client {
         }
     }
 
-    public void run() {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        serverAddress = validateIP(reader);
-        serverPort = validatePort(reader);
-        user = getUser(reader);
-        String password = getPassword(reader);
-
-        ReadMessage readMessage = new ReadMessage();
-        readMessage.start();
-
-        connectToServer(user, password, listeningSocket.getLocalPort(), reader);
-        printLastMessages();
-
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.start();
-    }
-
-
     private class SendMessage extends Thread {
         BufferedReader userIn;
 
@@ -203,8 +193,7 @@ public class Client {
                     } finally {
                         serverSocket.close();
                     }
-                }
-                catch(IOException e) {
+                } catch (IOException e) {
                     System.out.println("Erreur dans l'envoi du message! Déconnexion.");
                 }
             }
@@ -230,7 +219,7 @@ public class Client {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    try{
+                    try {
                         listeningSocket.close();
                         listeningSocket = new ServerSocket(listeningPort);
                     } catch (IOException e) {
