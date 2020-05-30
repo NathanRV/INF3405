@@ -12,25 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Client {
-    private ServerSocket listeningSocket;
-    private int listeningPort;
-    private Socket serverSocket;
-    private String serverAddress;
-    private int serverPort;
     private String token;
-    private String user;
+    private String username;
 
     public Client() {
-        try {
-            listeningSocket = new ServerSocket(0);
-            listeningPort = listeningSocket.getLocalPort();
-            listeningSocket.setReuseAddress(true);
-            serverSocket = null;
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        token = "";
     }
 
     public static void main(String[] args) throws Exception {
