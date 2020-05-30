@@ -93,11 +93,27 @@ public class Client {
         return new HashMap<>();
     }
 
-    private void printLastMessages() {
+
+    private void login(BufferedReader reader, String serverAddress, int serverPort) {
         try {
-            serverSocket = new Socket(serverAddress, serverPort);
-            DataOutputStream serverOutputStream = new DataOutputStream(serverSocket.getOutputStream());
-            DataInputStream serverInputStream = new DataInputStream(serverSocket.getInputStream());
+            System.out.print("Veuillez entrer le nom d'utilisateur : ");
+            username = reader.readLine();
+            System.out.print("Veuillez entrer le mot de passe : ");
+            String password = reader.readLine();
+            ServerSocket listeningSocket = new ServerSocket(0);
+            int listeningPort = listeningSocket.getLocalPort();
+            listeningSocket.setReuseAddress(true);
+            Map<String, String> requestPayload = Map.of(
+                    "listening_port", Integer.toString(listeningPort),
+                    "username", username,
+                    "password", password
+            );
+            Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "LOG_IN", requestPayload);
+            token = responsePayload.get("Token") != null ? responsePayload.get("Token") : "";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
             Request resquest = new Request("GET_MESSAGES", token, new HashMap<>());
             serverOutputStream.writeUTF(resquest.encodeRequest());
