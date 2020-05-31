@@ -141,6 +141,9 @@ public class Client {
     private boolean selectAction(BufferedReader reader, String serverAddress, int serverPort) {
         if (token.matches("")) {
             login(reader, serverAddress, serverPort);
+            if (token.matches("")) {
+                return false;
+            }
             printLastMessages(reader, serverAddress, serverPort);
             ReadMessage messageListener = new ReadMessage();
             messageListener.start();
