@@ -80,8 +80,8 @@ public class Client {
                     payload
             );
             outputStream.writeUTF(request.encodeRequest());
-            socket.close();
             Response response = Response.decodeResponse(inputStream.readUTF());
+            socket.close();
             if (response.getResponse().equals("OK")) {
                 return response.getPayload();
             } else {
