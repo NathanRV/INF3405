@@ -149,29 +149,21 @@ public class Client {
             messageListener.start();
             return false;
         } else {
-            Map<String, Runnable> actionMap = Map.of(
-                    "a", () -> new SendMessage(serverAddress, serverPort).start(),
-                    "b", () -> logout(reader, serverAddress, serverPort)
-            );
-            System.out.print(
-                    "Veuillez selectionner une action\n" +
-                            "   a) Nouveau message\n" +
-                            "   b) Logout\n" +
-                            "   c) Fermer" +
-                            "Selection: "
-            );
             try {
                 String action = reader.readLine();
-                if (action.matches("c")) {
+                if (action.equals("/logout")) {
+                    logout(reader, serverAddress, serverPort);
+                    return false;
+                } else if (action.equals("/exit")) {
+                    logout(reader, serverAddress, serverPort);
                     return true;
                 } else {
-                    actionMap.get(action).run();
-                    return false;
+                    new SendMessage(serverAddress, serverPort, action).start();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                return true;
             }
+            return false;
         }
     }
 
@@ -188,17 +180,16 @@ public class Client {
     private class SendMessage extends Thread {
         String serverAddress;
         int serverPort;
+        String inputMessage;
 
-        public SendMessage(String serverAddress, int serverPort) {
+        public SendMessage(String serverAddress, int serverPort, String inputMessage) {
             this.serverAddress = serverAddress;
             this.serverPort = serverPort;
+            this.inputMessage = inputMessage;
         }
 
         public void run() {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            System.out.println("Nouveau message:");
             try {
-                String inputMessage = reader.readLine();
                 Message message = new Message(username, serverAddress, serverPort, inputMessage);
                 Map<String, String> requestPayload = Map.of("Message", message.encodeMessage());
                 Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "NEW_MESSAGE", requestPayload);
@@ -206,8 +197,6 @@ public class Client {
                 if (username != null) {
                     System.out.println("Message envoye avec succes!");
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (MessageSizeException e) {
                 System.out.println("Erreur: la taille du message doit être de 200 caractères ou moins.");
             }
