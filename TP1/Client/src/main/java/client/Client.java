@@ -5,54 +5,24 @@ import protocol.Message;
 import protocol.Request;
 import protocol.Response;
 
-import java.net.*;
 import java.io.*;
-import java.time.Instant;
+import java.net.ConnectException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Client {
-    private ServerSocket listeningSocket;
-    private int listeningPort;
-    private Socket serverSocket;
-    private String serverAddress;
-    private int serverPort;
     private String token;
-    private String user;
+    private String username;
 
     public Client() {
-        try {
-            listeningSocket = new ServerSocket(0);
-            listeningPort = listeningSocket.getLocalPort();
-            listeningSocket.setReuseAddress(true);
-            serverSocket = null;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        token = "";
     }
 
-    private String getUser(BufferedReader reader) {
-        System.out.print("Veuillez entrer le nom d'utilisateur : ");
-        String username;
-        try {
-            username = reader.readLine();
-            return username;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-    private String getPassword(BufferedReader reader) {
-        System.out.print("Veuillez entrer le mot de passe : ");
-        String password;
-        try {
-            password = reader.readLine();
-            return password;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "";
+    public static void main(String[] args) {
+        Client client = new Client();
+        client.run();
     }
 
     private String validateIP(BufferedReader reader) {
@@ -64,14 +34,13 @@ public class Client {
         while (!valid) {
             try {
                 serverAddress = reader.readLine();
-            }
-            catch(IOException e) {
-                e.printStackTrace();
-            }
-            if (serverAddress.matches(IP_PATTERN)) {
-                valid = true;
-            } else {
-                System.out.print("Adresse IP entree invalide! Veuillez entre une adresse du format XXX.XXX.XXX.XXX : ");
+            } catch (IOException e) {
+            } finally {
+                if (serverAddress.matches(IP_PATTERN)) {
+                    valid = true;
+                } else {
+                    System.out.print("Adresse IP entree invalide! Veuillez entre une adresse du format XXX.XXX.XXX.XXX : ");
+                }
             }
         }
         return serverAddress;
@@ -81,140 +50,166 @@ public class Client {
         System.out.print("Veuillez entrez le port d'ecoute du serveur : ");
         int serverPort = 0;
         boolean valid = false;
-        while (!valid)
-        {
+        while (!valid) {
             try {
                 serverPort = Integer.parseInt(reader.readLine());
-            }
-            catch(Exception e) {
+            } catch (NumberFormatException e) {
                 serverPort = 0;
-            }
-            if (serverPort >= 5000 && serverPort<=5050) {
-                valid = true;
-            } else {
-                System.out.print("Port invalide! (Veuillez entrez un nombre entre 5000 et 5050) ");
+            } catch (IOException e) {
+            } finally {
+                if (serverPort >= 5000 && serverPort <= 5050) {
+                    valid = true;
+                } else {
+                    System.out.print("Port invalide! (Veuillez entrez un nombre entre 5000 et 5050) ");
+                }
             }
         }
 
         return serverPort;
     }
 
-    private void connectToServer(String username, String password, int listeningPort, BufferedReader reader) {
-        boolean connected = false;
+    private Map<String, String> sendRequest(String serverAddress, int serverPort, String requestID, Map<String, String> payload) {
         try {
-            while (!connected) {
-                serverSocket = new Socket(serverAddress, serverPort);
-                DataOutputStream serverOutputStream = new DataOutputStream(serverSocket.getOutputStream());
-                serverOutputStream.writeUTF(new Request("LOG_IN", "", Map.of("username", username,
-                        "password", password, "listening_port", Integer.toString(listeningPort))).encodeRequest());
-
-                DataInputStream serverInputStream = new DataInputStream(serverSocket.getInputStream());
-                Response response = Response.decodeResponse(serverInputStream.readUTF());
-
-                if (response.getResponse().equals("OK")) {
-                    String token = response.getPayload().get("Token");
-                    if (token != null) {
-                        this.token = token;
-                        connected = true;
-                    }
-                    serverSocket.close();
-                }
-                else {
+            Socket socket = new Socket(serverAddress, serverPort);
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+            DataInputStream inputStream = new DataInputStream(socket.getInputStream());
+            Request request = new Request(
+                    requestID,
+                    token,
+                    payload
+            );
+            outputStream.writeUTF(request.encodeRequest());
+            Response response = Response.decodeResponse(inputStream.readUTF());
+            socket.close();
+            if (response.getResponse().equals("OK")) {
+                return response.getPayload();
+            } else {
+                if (response.getPayload().get("Type").matches("Wrong password")) {
+                    System.out.println("Erreur dans la saisie du mot de passe");
+                } else {
                     System.out.println("Error: " + response.getPayload().get("Type"));
-                    serverSocket.close();
-                    serverSocket = new Socket(serverAddress, serverPort);
-                    username = getUser(reader);
-                    password = getPassword(reader);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ConnectException e) {
+            System.out.println("Erreur: Incapable de joindre le serveur");
+        } catch (IOException e) {
+        }
+        return new HashMap<>();
+    }
+
+    private void login(BufferedReader reader, String serverAddress, int serverPort, int listeningPort) {
+        try {
+            System.out.print("Veuillez entrer le nom d'utilisateur : ");
+            username = reader.readLine();
+            System.out.print("Veuillez entrer le mot de passe : ");
+            String password = reader.readLine();
+            Map<String, String> requestPayload = Map.of(
+                    "listening_port", Integer.toString(listeningPort),
+                    "username", username,
+                    "password", password
+            );
+            Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "LOG_IN", requestPayload);
+            token = responsePayload.get("Token") != null ? responsePayload.get("Token") : "";
+        } catch (IOException e) {
         }
     }
 
-    private void printLastMessages() {
-        try {
-            serverSocket = new Socket(serverAddress, serverPort);
-            DataOutputStream serverOutputStream = new DataOutputStream(serverSocket.getOutputStream());
-            DataInputStream serverInputStream = new DataInputStream(serverSocket.getInputStream());
-
-            Request resquest = new Request("GET_MESSAGES", token, new HashMap<>());
-            serverOutputStream.writeUTF(resquest.encodeRequest());
-
-            Response response = Response.decodeResponse(serverInputStream.readUTF());
-            int size = Integer.parseInt(response.getPayload().get("size"));
-            Message message;
-            for (int i = 1; i <= size; ++i) {
-                message = Message.decodeMessage(response.getPayload().get(Integer.toString(size-i)));
-                if (message != null) {
-                    System.out.println(message.toConsole());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void logout(BufferedReader reader, String serverAddress, int serverPort) {
+        Map<String, String> requestPayload = Map.of();
+        Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "LOG_OUT", requestPayload);
+        String username = responsePayload.get("username");
+        if (username != null) {
+            token = "";
+            System.out.println("Logout avec succès: " + username);
         }
+    }
+
+    private void printLastMessages(BufferedReader reader, String serverAddress, int serverPort) {
+        Map<String, String> requestPayload = Map.of();
+        Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "GET_MESSAGES", requestPayload);
+        int size = Integer.parseInt(responsePayload.get("size"));
+        Message message;
+        for (int i = 1; i <= size; ++i) {
+            message = Message.decodeMessage(responsePayload.get(Integer.toString(size - i)));
+            if (message != null) {
+                System.out.println(message.toConsole());
+            }
+        }
+    }
+
+    private boolean selectAction(BufferedReader reader, String serverAddress, int serverPort) {
+        if (token.matches("")) {
+            try {
+                ServerSocket listeningSocket = new ServerSocket(0);
+                ReadMessage messageListener = new ReadMessage(listeningSocket);
+                messageListener.setDaemon(true);
+                messageListener.start();
+                login(reader, serverAddress, serverPort, listeningSocket.getLocalPort());
+                if (token.matches("")) {
+                    return false;
+                }
+                printLastMessages(reader, serverAddress, serverPort);
+                System.out.println("Bienvenue au serveur chat d'INF3405");
+                System.out.println("Pour se déconnecter, veuillez entrer /logout");
+                System.out.println("Pour quitter l'application, veuillez entrer /exit");
+            } catch (IOException e) {
+            }
+        } else {
+            try {
+                String action = reader.readLine();
+                if (action.equals("/logout")) {
+                    logout(reader, serverAddress, serverPort);
+                    return false;
+                } else if (action.equals("/exit")) {
+                    logout(reader, serverAddress, serverPort);
+                    return true;
+                } else {
+                    new SendMessage(serverAddress, serverPort, action).start();
+                }
+            } catch (IOException e) {
+            }
+        }
+        return false;
     }
 
     public void run() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        serverAddress = validateIP(reader);
-        serverPort = validatePort(reader);
-        user = getUser(reader);
-        String password = getPassword(reader);
-
-        ReadMessage readMessage = new ReadMessage();
-        readMessage.start();
-
-        connectToServer(user, password, listeningSocket.getLocalPort(), reader);
-        printLastMessages();
-
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.start();
+        String serverAddress = validateIP(reader);
+        int serverPort = validatePort(reader);
+        boolean quit = false;
+        while (!quit) {
+            quit = selectAction(reader, serverAddress, serverPort);
+        }
     }
 
-
     private class SendMessage extends Thread {
-        BufferedReader userIn;
+        String serverAddress;
+        int serverPort;
+        String inputMessage;
 
-        public SendMessage() {
-            userIn = new BufferedReader(new InputStreamReader(System.in));
+        public SendMessage(String serverAddress, int serverPort, String inputMessage) {
+            this.serverAddress = serverAddress;
+            this.serverPort = serverPort;
+            this.inputMessage = inputMessage;
         }
 
         public void run() {
-            String inputMessage;
-            Message message;
-            Request request;
-
-            while (true) {
-                try {
-                    inputMessage = userIn.readLine();
-                    serverSocket = new Socket(serverAddress, serverPort);
-                    DataOutputStream outputStream = new DataOutputStream(serverSocket.getOutputStream());
-                    DataInputStream inputStream = new DataInputStream(serverSocket.getInputStream());
-
-                    try {
-                        message = new Message(user, serverSocket.getInetAddress().toString(), serverSocket.getLocalPort(),
-                                Instant.now(), inputMessage);
-                        request = new Request("NEW_MESSAGE", token, Map.of("Message", message.encodeMessage()));
-                        outputStream.writeUTF(request.encodeRequest());
-                        Response response = Response.decodeResponse(inputStream.readUTF());
-                    } catch (MessageSizeException e) {
-                        System.out.println("Erreur: la taille du message doit être de 200 caractères ou moins.");
-                    } finally {
-                        serverSocket.close();
-                    }
-                }
-                catch(IOException e) {
-                    System.out.println("Erreur dans l'envoi du message! Déconnexion.");
-                }
+            try {
+                Message message = new Message(username, serverAddress, serverPort, inputMessage);
+                Map<String, String> requestPayload = Map.of("Message", message.encodeMessage());
+                sendRequest(serverAddress, serverPort, "NEW_MESSAGE", requestPayload);
+            } catch (MessageSizeException e) {
+                System.out.println("Erreur: la taille du message doit être de 200 caractères ou moins.");
             }
         }
     }
 
     private class ReadMessage extends Thread {
         private boolean running;
+        ServerSocket listeningSocket;
 
-        public ReadMessage() {
+        public ReadMessage(ServerSocket listeningSocket) {
+            this.listeningSocket = listeningSocket;
             running = true;
         }
 
@@ -227,15 +222,9 @@ public class Client {
                     if (message != null) {
                         System.out.println(message.toConsole());
                     }
+                    listeningSocket.close();
+                    listeningSocket = new ServerSocket(listeningSocket.getLocalPort());
                 } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    try{
-                        listeningSocket.close();
-                        listeningSocket = new ServerSocket(listeningPort);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         }
@@ -243,12 +232,5 @@ public class Client {
         public void terminate() {
             running = false;
         }
-    }
-
-
-    public static void main(String[] args) throws Exception
-    {
-        Client client = new Client();
-        client.run();
     }
 }
