@@ -6,6 +6,7 @@ import protocol.Request;
 import protocol.Response;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -87,6 +88,8 @@ public class Client {
             } else {
                 System.out.println("Error: " + response.getPayload().get("Type"));
             }
+        } catch (ConnectException e) {
+            System.out.println("Erreur: Incapable de joindre le serveur");
         } catch (IOException e) {
             e.printStackTrace();
         }
