@@ -93,7 +93,6 @@ public class Client {
         return new HashMap<>();
     }
 
-
     private void login(BufferedReader reader, String serverAddress, int serverPort) {
         try {
             System.out.print("Veuillez entrer le nom d'utilisateur : ");
@@ -146,8 +145,8 @@ public class Client {
             }
             printLastMessages(reader, serverAddress, serverPort);
             ReadMessage messageListener = new ReadMessage();
+            messageListener.setDaemon(true);
             messageListener.start();
-            return false;
         } else {
             try {
                 String action = reader.readLine();
@@ -163,8 +162,8 @@ public class Client {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return false;
         }
+        return false;
     }
 
     public void run() {
