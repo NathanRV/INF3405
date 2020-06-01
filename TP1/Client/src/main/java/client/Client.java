@@ -117,7 +117,7 @@ public class Client {
         String username = responsePayload.get("username");
         if (username != null) {
             token = "";
-            System.out.print("Logout avec succes: " + username);
+            System.out.println("Logout avec succès: " + username);
         }
     }
 
@@ -146,6 +146,9 @@ public class Client {
                     return false;
                 }
                 printLastMessages(reader, serverAddress, serverPort);
+                System.out.println("Bienvenue au serveur chat d'INF3405");
+                System.out.println("Pour se déconnecter, veuillez entrer /logout");
+                System.out.println("Pour quitter l'application, veuillez entrer /exit");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -193,11 +196,7 @@ public class Client {
             try {
                 Message message = new Message(username, serverAddress, serverPort, inputMessage);
                 Map<String, String> requestPayload = Map.of("Message", message.encodeMessage());
-                Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "NEW_MESSAGE", requestPayload);
-                String username = responsePayload.get("username");
-                if (username != null) {
-                    System.out.println("Message envoye avec succes!");
-                }
+                sendRequest(serverAddress, serverPort, "NEW_MESSAGE", requestPayload);
             } catch (MessageSizeException e) {
                 System.out.println("Erreur: la taille du message doit être de 200 caractères ou moins.");
             }
