@@ -93,15 +93,12 @@ public class Client {
         return new HashMap<>();
     }
 
-    private void login(BufferedReader reader, String serverAddress, int serverPort) {
+    private void login(BufferedReader reader, String serverAddress, int serverPort, int listeningPort) {
         try {
             System.out.print("Veuillez entrer le nom d'utilisateur : ");
             username = reader.readLine();
             System.out.print("Veuillez entrer le mot de passe : ");
             String password = reader.readLine();
-            ServerSocket listeningSocket = new ServerSocket(0);
-            int listeningPort = listeningSocket.getLocalPort();
-            listeningSocket.setReuseAddress(true);
             Map<String, String> requestPayload = Map.of(
                     "listening_port", Integer.toString(listeningPort),
                     "username", username,
@@ -139,14 +136,19 @@ public class Client {
 
     private boolean selectAction(BufferedReader reader, String serverAddress, int serverPort) {
         if (token.matches("")) {
-            login(reader, serverAddress, serverPort);
-            if (token.matches("")) {
-                return false;
+            try {
+                ServerSocket listeningSocket = new ServerSocket(0);
+                ReadMessage messageListener = new ReadMessage(listeningSocket);
+                messageListener.setDaemon(true);
+                messageListener.start();
+                login(reader, serverAddress, serverPort, listeningSocket.getLocalPort());
+                if (token.matches("")) {
+                    return false;
+                }
+                printLastMessages(reader, serverAddress, serverPort);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            printLastMessages(reader, serverAddress, serverPort);
-            ReadMessage messageListener = new ReadMessage();
-            messageListener.setDaemon(true);
-            messageListener.start();
         } else {
             try {
                 String action = reader.readLine();
@@ -204,16 +206,16 @@ public class Client {
 
     private class ReadMessage extends Thread {
         private boolean running;
+        ServerSocket listeningSocket;
 
-        public ReadMessage() {
+        public ReadMessage(ServerSocket listeningSocket) {
+            this.listeningSocket = listeningSocket;
             running = true;
         }
 
         public void run() {
             while (running) {
                 try {
-                    ServerSocket listeningSocket = new ServerSocket(0);
-                    int listeningPort = listeningSocket.getLocalPort();
                     Socket currentServerSocket = listeningSocket.accept();
                     DataInputStream inputStream = new DataInputStream(currentServerSocket.getInputStream());
                     Message message = Message.decodeMessage(inputStream.readUTF());
@@ -221,6 +223,7 @@ public class Client {
                         System.out.println(message.toConsole());
                     }
                     listeningSocket.close();
+                    listeningSocket = new ServerSocket(listeningSocket.getLocalPort());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
