@@ -12,22 +12,35 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ *
+ */
 public class Serveur extends Thread {
     private volatile static ConcurrentMap<String, ConnectedUser> connectedUsers;
     private volatile static BlockingQueue<Message> messagesQueue;
     private static ServerSocket listener;
     private boolean serverRunning;
 
+    /**
+     *
+     */
     public Serveur() {
         connectedUsers = new ConcurrentHashMap<>();
         messagesQueue = new LinkedBlockingQueue<>();
         serverRunning = false;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean getServerRunning() {
         return serverRunning;
     }
 
+    /**
+     *
+     */
     private void initiateServer() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String serverAddress = validateIP(reader);
@@ -45,6 +58,11 @@ public class Serveur extends Thread {
         serverRunning = true;
     }
 
+    /**
+     *
+     * @param reader
+     * @return
+     */
     private String validateIP(BufferedReader reader) {
         System.out.print("Veuillez entrez l'adresse IP du serveur : ");
         String serverAddress = "";
@@ -65,6 +83,11 @@ public class Serveur extends Thread {
         return serverAddress;
     }
 
+    /**
+     *
+     * @param reader
+     * @return
+     */
     private int validatePort(BufferedReader reader) {
         System.out.print("Veuillez entrez le port d'ecoute du serveur : ");
         int serverPort = 0;
@@ -85,6 +108,9 @@ public class Serveur extends Thread {
         return serverPort;
     }
 
+    /**
+     *
+     */
     public void closeSocket() {
         try {
             listener.close();
@@ -92,6 +118,9 @@ public class Serveur extends Thread {
         }
     }
 
+    /**
+     *
+     */
     public void run() {
         initiateServer();
         MessageHandler messageHandler = new MessageHandler(connectedUsers, messagesQueue);
@@ -111,6 +140,9 @@ public class Serveur extends Thread {
         }
     }
 
+    /**
+     *
+     */
     private class ClientHandler extends Thread {
         private Socket socket;
         private DataInputStream reader;
@@ -119,6 +151,12 @@ public class Serveur extends Thread {
         private volatile ConcurrentMap<String, ConnectedUser> connectedUsers;
         private volatile BlockingQueue<Message> messagesQueue;
 
+        /**
+         *
+         * @param socket
+         * @param connectedUsers
+         * @param messagesQueue
+         */
         public ClientHandler(Socket socket, ConcurrentMap<String, ConnectedUser> connectedUsers,
                              BlockingQueue<Message> messagesQueue) {
             this.socket = socket;
@@ -132,6 +170,9 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         */
         public void run() {
             try {
                 Request request = Request.decodeRequest(reader.readUTF());
@@ -140,6 +181,10 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         * @param request
+         */
         private void processRequest(Request request) {
             switch (request.getRequest()) {
                 case "LOG_IN":
@@ -159,6 +204,10 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         * @param request
+         */
         private void processLogIn(Request request) {
             String username = request.getPayload().get("username");
             String password = request.getPayload().get("password");
@@ -194,6 +243,13 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         * @param request
+         * @param username
+         * @param password
+         * @param port
+         */
         private void processNewUser(Request request, String username, String password, int port) {
             User user = new User(username);
             user.setPassword(password);
@@ -209,6 +265,10 @@ public class Serveur extends Thread {
             sendResponse(response);
         }
 
+        /**
+         *
+         * @param request
+         */
         private void processLogOut(Request request) {
             String token = request.getToken();
             ConnectedUser connectedUser = connectedUsers.remove(token);
@@ -220,6 +280,10 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         * @param request
+         */
         private void processNewMessage(Request request) {
             ConnectedUser connectedUser = connectedUsers.get(request.getToken());
             if (connectedUser == null) {
@@ -241,6 +305,10 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         * @param request
+         */
         private void processMessagesRequest(Request request) {
             ConnectedUser connectedUser = connectedUsers.get(request.getToken());
             if (connectedUser == null) {
@@ -260,11 +328,19 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         * @param payload
+         */
         private void sendErrorResponse(Map<String, String> payload) {
             Response response = new Response("ERROR", payload);
             sendResponse(response);
         }
 
+        /**
+         *
+         * @param response
+         */
         private void sendResponse(Response response) {
             try {
                 writer.writeUTF(response.encodeResponse());
@@ -274,12 +350,20 @@ public class Serveur extends Thread {
         }
     }
 
+    /**
+     *
+     */
     private class MessageHandler extends Thread {
         private volatile ConcurrentMap<String, ConnectedUser> connectedUsers;
         private volatile BlockingQueue<Message> messagesQueue;
         private volatile Boolean running = true;
         private Database database;
 
+        /**
+         *
+         * @param connectedUsers
+         * @param messagesQueue
+         */
         public MessageHandler(ConcurrentMap<String, ConnectedUser> connectedUsers,
                               BlockingQueue<Message> messagesQueue) {
             this.connectedUsers = connectedUsers;
@@ -287,6 +371,9 @@ public class Serveur extends Thread {
             database = Database.getInstance();
         }
 
+        /**
+         *
+         */
         public void run() {
             Message message;
             while (running) {
@@ -298,6 +385,10 @@ public class Serveur extends Thread {
             }
         }
 
+        /**
+         *
+         * @param message
+         */
         private void sendMessage(Message message) {
             Map<String, ConnectedUser> users = Collections.unmodifiableMap(connectedUsers);
             users.forEach((k, u) -> {
@@ -319,11 +410,17 @@ public class Serveur extends Thread {
             System.out.println(fancyPrint);
         }
 
+        /**
+         *
+         */
         public void terminate() {
             running = false;
         }
     }
 
+    /**
+     *
+     */
     private class MessageSender extends Thread {
         private final ConnectedUser user;
         private final Message message;
@@ -343,6 +440,11 @@ public class Serveur extends Thread {
         }
     }
 
+    /**
+     *
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Serveur serveur = new Serveur();

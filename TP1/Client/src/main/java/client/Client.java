@@ -12,19 +12,34 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *
+ */
 public class Client {
     private String token;
     private String username;
 
+    /**
+     *
+     */
     public Client() {
         token = "";
     }
 
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         Client client = new Client();
         client.run();
     }
 
+    /**
+     *
+     * @param reader
+     * @return
+     */
     private String validateIP(BufferedReader reader) {
         System.out.print("Veuillez entrez l'adresse IP du serveur : ");
         String serverAddress = "";
@@ -46,6 +61,11 @@ public class Client {
         return serverAddress;
     }
 
+    /**
+     *
+     * @param reader
+     * @return
+     */
     private int validatePort(BufferedReader reader) {
         System.out.print("Veuillez entrez le port d'ecoute du serveur : ");
         int serverPort = 0;
@@ -68,6 +88,14 @@ public class Client {
         return serverPort;
     }
 
+    /**
+     *
+     * @param serverAddress
+     * @param serverPort
+     * @param requestID
+     * @param payload
+     * @return
+     */
     private Map<String, String> sendRequest(String serverAddress, int serverPort, String requestID, Map<String, String> payload) {
         try {
             Socket socket = new Socket(serverAddress, serverPort);
@@ -97,6 +125,13 @@ public class Client {
         return new HashMap<>();
     }
 
+    /**
+     *
+     * @param reader
+     * @param serverAddress
+     * @param serverPort
+     * @param listeningPort
+     */
     private void login(BufferedReader reader, String serverAddress, int serverPort, int listeningPort) {
         try {
             System.out.print("Veuillez entrer le nom d'utilisateur : ");
@@ -114,6 +149,12 @@ public class Client {
         }
     }
 
+    /**
+     *
+     * @param reader
+     * @param serverAddress
+     * @param serverPort
+     */
     private void logout(BufferedReader reader, String serverAddress, int serverPort) {
         Map<String, String> requestPayload = Map.of();
         Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "LOG_OUT", requestPayload);
@@ -124,6 +165,12 @@ public class Client {
         }
     }
 
+    /**
+     *
+     * @param reader
+     * @param serverAddress
+     * @param serverPort
+     */
     private void printLastMessages(BufferedReader reader, String serverAddress, int serverPort) {
         Map<String, String> requestPayload = Map.of();
         Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "GET_MESSAGES", requestPayload);
@@ -137,6 +184,13 @@ public class Client {
         }
     }
 
+    /**
+     *
+     * @param reader
+     * @param serverAddress
+     * @param serverPort
+     * @return
+     */
     private boolean selectAction(BufferedReader reader, String serverAddress, int serverPort) {
         if (token.matches("")) {
             try {
@@ -172,6 +226,9 @@ public class Client {
         return false;
     }
 
+    /**
+     *
+     */
     public void run() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String serverAddress = validateIP(reader);
@@ -182,17 +239,29 @@ public class Client {
         }
     }
 
+    /**
+     *
+     */
     private class SendMessage extends Thread {
         String serverAddress;
         int serverPort;
         String inputMessage;
 
+        /**
+         *
+         * @param serverAddress
+         * @param serverPort
+         * @param inputMessage
+         */
         public SendMessage(String serverAddress, int serverPort, String inputMessage) {
             this.serverAddress = serverAddress;
             this.serverPort = serverPort;
             this.inputMessage = inputMessage;
         }
 
+        /**
+         *
+         */
         public void run() {
             try {
                 Message message = new Message(username, serverAddress, serverPort, inputMessage);
@@ -204,15 +273,25 @@ public class Client {
         }
     }
 
+    /**
+     *
+     */
     private class ReadMessage extends Thread {
         private boolean running;
         ServerSocket listeningSocket;
 
+        /**
+         *
+         * @param listeningSocket
+         */
         public ReadMessage(ServerSocket listeningSocket) {
             this.listeningSocket = listeningSocket;
             running = true;
         }
 
+        /**
+         *
+         */
         public void run() {
             while (running) {
                 try {
@@ -229,6 +308,9 @@ public class Client {
             }
         }
 
+        /**
+         *
+         */
         public void terminate() {
             running = false;
         }
