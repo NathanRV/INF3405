@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.Date;
 
 /**
- *
+ * Classe qui représente un message envoyé par un client
  */
 final public class Message {
     private final String senderName;
@@ -18,20 +18,19 @@ final public class Message {
     private final Integer senderPort;
     private final String time;
     private final String message;
-    protected static String pattern = "yyyy-MM-dd@HH:mm:ss";
-    protected static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
     private static final int MAXIMUM_SIZE = 200;
 
     /**
-     *
-     * @param senderName
-     * @param senderIp
-     * @param senderPort
-     * @param message
-     * @throws MessageSizeException
+     * Constructeur par défaut
+     * @param senderName            l'utilisateur qui envoie le message
+     * @param senderIp              l'adresse ip de l'utilisateur qui envoie le message
+     * @param senderPort            le port de l'utilisateur qui envoie le message
+     * @param time                  l'instant de l'envoi du message
+     * @param message               le message envoyé
+     * @throws MessageSizeException lorsque la taille du message excède la taille maximale
      */
-    public Message(String senderName, String senderIp, Integer senderPort, String message)
+    public Message(String senderName, String senderIp, Integer senderPort, Instant time, String message)
             throws MessageSizeException {
         if (message.length() > MAXIMUM_SIZE) {
             throw new MessageSizeException("La taille maximale du message est de 200 caractères.");
@@ -40,53 +39,33 @@ final public class Message {
         this.senderName = senderName;
         this.senderIp = senderIp;
         this.senderPort = senderPort;
-        this.time = simpleDateFormat.format(new Date());
+        this.time = time.toString();
         this.message = message;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getSenderName() {
         return senderName;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getSenderIp() {
         return senderIp;
     }
 
-    /**
-     *
-     * @return
-     */
     public Integer getSenderPort() {
         return senderPort;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getTime() {
         return time;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getMessage() {
         return message;
     }
 
     /**
-     *
-     * @return
+     * Encode le message dans un format JSON
+     * @return le message encodé
      */
     public String encodeMessage() {
         Gson gson = new Gson();
@@ -94,9 +73,9 @@ final public class Message {
     }
 
     /**
-     *
-     * @param string
-     * @return
+     * Décode le message en format JSON
+     * @param string le message encodé
+     * @return       le message décodé
      */
     public static Message decodeMessage(String string) {
         Gson gson = new Gson();
@@ -108,8 +87,8 @@ final public class Message {
     }
 
     /**
-     *
-     * @return
+     * Convertir le message dans le format correspondant à l'affichage dans la console
+     * @return le message formaté
      */
     public String toConsole() {
         return "[" + senderName + "]: " + message;
