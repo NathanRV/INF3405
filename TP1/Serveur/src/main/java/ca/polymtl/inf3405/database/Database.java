@@ -9,6 +9,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ */
 public class Database {
     private static volatile Database instance;
     private static final String createUsersQuery = "CREATE TABLE IF NOT EXISTS users (" +
@@ -18,6 +21,9 @@ public class Database {
             "sender_port INTEGER, time TEXT NOT NULL, message TEXT NOT NULL )";
     private static final String path = "messenger.sqlite";
 
+    /**
+     *
+     */
     private Database() {
         Connection connection = null;
         try {
@@ -40,6 +46,10 @@ public class Database {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public static Database getInstance() {
         if (instance == null) {
             synchronized (Database.class) {
@@ -51,6 +61,11 @@ public class Database {
         return instance;
     }
 
+    /**
+     *
+     * @param m
+     * @throws DatabaseInsertionException
+     */
     public synchronized void insertNewMessage(Message m) throws DatabaseInsertionException {
         Connection connection = null;
         try {
@@ -73,6 +88,11 @@ public class Database {
         }
     }
 
+    /**
+     *
+     * @param u
+     * @throws DatabaseInsertionException
+     */
     public synchronized void insertNewUser(User u) throws DatabaseInsertionException {
         Connection connection = null;
         try {
@@ -94,6 +114,12 @@ public class Database {
         }
     }
 
+    /**
+     *
+     * @param username
+     * @return
+     * @throws NoUserException
+     */
     public synchronized User getUser(String username) throws NoUserException {
         Connection connection = null;
         String passwordHash = "";
@@ -122,6 +148,11 @@ public class Database {
         return new User(username, passwordHash);
     }
 
+    /**
+     *
+     * @param numberOfMessages
+     * @return
+     */
     public synchronized List<Message> getLastMessages(Integer numberOfMessages) {
         Connection connection = null;
         List<Message> messages = new ArrayList<>(numberOfMessages);
