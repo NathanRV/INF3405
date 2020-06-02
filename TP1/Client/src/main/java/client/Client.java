@@ -13,20 +13,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Class client de l'application.
  */
 public class Client {
     private String token;
     private String username;
 
     /**
-     *
+     * Constructeur du client.
      */
     public Client() {
         token = "";
     }
 
     /**
+     * Fonctions permettant de lancer les clients.
      *
      * @param args
      */
@@ -36,9 +37,11 @@ public class Client {
     }
 
     /**
+     * Fonctions permettant de valider l'adresse IP entre
+     * sur la console.
      *
-     * @param reader
-     * @return
+     * @param reader : BufferedReader (Entree du texte)
+     * @return String : Adresse IP valide.
      */
     private String validateIP(BufferedReader reader) {
         System.out.print("Veuillez entrez l'adresse IP du serveur : ");
@@ -62,9 +65,11 @@ public class Client {
     }
 
     /**
+     * Fonctions permettant de valider le port entre sur
+     * la console.
      *
-     * @param reader
-     * @return
+     * @param reader : BufferedReader (Entree du texte)
+     * @return int : Port valide
      */
     private int validatePort(BufferedReader reader) {
         System.out.print("Veuillez entrez le port d'ecoute du serveur : ");
@@ -89,12 +94,13 @@ public class Client {
     }
 
     /**
+     * Fonctions de connexion au serveur.
      *
-     * @param serverAddress
-     * @param serverPort
-     * @param requestID
-     * @param payload
-     * @return
+     * @param serverAddress : String (Adresse du serveur)
+     * @param serverPort : int (Port du serveur)
+     * @param requestID : String (ID de requete)
+     * @param payload : Map<String, String>
+     * @return Map<String, String>
      */
     private Map<String, String> sendRequest(String serverAddress, int serverPort, String requestID, Map<String, String> payload) {
         try {
@@ -126,11 +132,12 @@ public class Client {
     }
 
     /**
+     * Fonctions de connexion du client.
      *
-     * @param reader
-     * @param serverAddress
-     * @param serverPort
-     * @param listeningPort
+     * @param reader : BufferedReader (Entree de texte)
+     * @param serverAddress : String (Adresse du serveur)
+     * @param serverPort : int (Port du serveur)
+     * @param listeningPort : int (Port d'ecoute)
      */
     private void login(BufferedReader reader, String serverAddress, int serverPort, int listeningPort) {
         try {
@@ -150,12 +157,12 @@ public class Client {
     }
 
     /**
+     * Fonctions de deconnexion du client.
      *
-     * @param reader
-     * @param serverAddress
-     * @param serverPort
+     * @param serverAddress : String (Adresse du serveur)
+     * @param serverPort : int (Port du serveur)
      */
-    private void logout(BufferedReader reader, String serverAddress, int serverPort) {
+    private void logout(String serverAddress, int serverPort) {
         Map<String, String> requestPayload = Map.of();
         Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "LOG_OUT", requestPayload);
         String username = responsePayload.get("username");
@@ -166,12 +173,12 @@ public class Client {
     }
 
     /**
+     * Fonctions permettant d'afficher les derniers messages.
      *
-     * @param reader
-     * @param serverAddress
-     * @param serverPort
+     * @param serverAddress : String (Adresse du serveur)
+     * @param serverPort : int (Port du serveur)
      */
-    private void printLastMessages(BufferedReader reader, String serverAddress, int serverPort) {
+    private void printLastMessages(String serverAddress, int serverPort) {
         Map<String, String> requestPayload = Map.of();
         Map<String, String> responsePayload = sendRequest(serverAddress, serverPort, "GET_MESSAGES", requestPayload);
         int size = Integer.parseInt(responsePayload.get("size"));
@@ -185,11 +192,12 @@ public class Client {
     }
 
     /**
+     * Fonctions de menu permettant la deconnexion ou quitter.
      *
-     * @param reader
-     * @param serverAddress
-     * @param serverPort
-     * @return
+     * @param reader : BufferedReader(Entree du texte)
+     * @param serverAddress : String (Adresse du serveur)
+     * @param serverPort : int (Port du serveur)
+     * @return boolean
      */
     private boolean selectAction(BufferedReader reader, String serverAddress, int serverPort) {
         if (token.matches("")) {
@@ -202,7 +210,7 @@ public class Client {
                 if (token.matches("")) {
                     return false;
                 }
-                printLastMessages(reader, serverAddress, serverPort);
+                printLastMessages(serverAddress, serverPort);
                 System.out.println("Bienvenue au serveur chat d'INF3405");
                 System.out.println("Pour se déconnecter, veuillez entrer /logout");
                 System.out.println("Pour quitter l'application, veuillez entrer /exit");
@@ -212,10 +220,10 @@ public class Client {
             try {
                 String action = reader.readLine();
                 if (action.equals("/logout")) {
-                    logout(reader, serverAddress, serverPort);
+                    logout(serverAddress, serverPort);
                     return false;
                 } else if (action.equals("/exit")) {
-                    logout(reader, serverAddress, serverPort);
+                    logout(serverAddress, serverPort);
                     return true;
                 } else {
                     new SendMessage(serverAddress, serverPort, action).start();
@@ -227,7 +235,8 @@ public class Client {
     }
 
     /**
-     *
+     * Fonctions permettant de lancer les validations initiales
+     * ainsi que le menu de selection d'options.
      */
     public void run() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -240,7 +249,7 @@ public class Client {
     }
 
     /**
-     *
+     * Thread SendMessage
      */
     private class SendMessage extends Thread {
         String serverAddress;
@@ -248,10 +257,11 @@ public class Client {
         String inputMessage;
 
         /**
+         * Constructeur
          *
-         * @param serverAddress
-         * @param serverPort
-         * @param inputMessage
+         * @param serverAddress : String
+         * @param serverPort : int
+         * @param inputMessage : String
          */
         public SendMessage(String serverAddress, int serverPort, String inputMessage) {
             this.serverAddress = serverAddress;
@@ -260,7 +270,7 @@ public class Client {
         }
 
         /**
-         *
+         * Fonction run permettant l'envoi du message.
          */
         public void run() {
             try {
@@ -274,15 +284,16 @@ public class Client {
     }
 
     /**
-     *
+     * Thread ReadMessage
      */
     private class ReadMessage extends Thread {
         private boolean running;
         ServerSocket listeningSocket;
 
         /**
+         * Constructeur ReadMessage
          *
-         * @param listeningSocket
+         * @param listeningSocket : ServerSocket (Socket d'ecoute)
          */
         public ReadMessage(ServerSocket listeningSocket) {
             this.listeningSocket = listeningSocket;
@@ -290,7 +301,7 @@ public class Client {
         }
 
         /**
-         *
+         * Fonction run permettant d'ecouter constamment pour recevoir les messages.
          */
         public void run() {
             while (running) {
@@ -309,7 +320,7 @@ public class Client {
         }
 
         /**
-         *
+         * Fonction qui permet d'arreter l'ecoute.
          */
         public void terminate() {
             running = false;
