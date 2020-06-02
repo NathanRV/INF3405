@@ -6,69 +6,40 @@ import java.security.SecureRandom;
 import java.time.Instant;
 
 /**
- *
+ * Classe qui représente un utilisateur connecté au serveur
  */
 public class ConnectedUser extends User {
     private final String token;
-    private volatile Instant lastConnection;
     private final InetAddress userAddress;
     private final int userPort;
 
     /**
-     *
-     * @param user
-     * @param addr
-     * @param port
+     * Constructeur par défaut
+     * @param user l'utilisateur
+     * @param addr l'adresse de l'utilisateur
+     * @param port le port de l'utilisateur
      */
     public ConnectedUser(User user, InetAddress addr, int port) {
         super(user);
         token = generateToken();
-        lastConnection = Instant.now();
         userAddress = addr;
         userPort = port;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getToken() {
         return token;
     }
 
-    /**
-     *
-     * @return
-     */
-    public Instant getLastConnection() {
-        return lastConnection;
-    }
-
-    /**
-     *
-     * @return
-     */
     public InetAddress getUserAddress() {
         return userAddress;
     }
 
-    /**
-     *
-     * @return
-     */
     public int getUserPort() {
         return userPort;
     }
 
     /**
-     *
-     */
-    public synchronized void updateLastConnection() {
-        lastConnection = Instant.now();
-    }
-
-    /**
-     *
+     * Génère un token aléatoire pour des fins d'authentification
      * @return
      */
     private String generateToken() {

@@ -7,7 +7,7 @@ import com.google.gson.JsonSyntaxException;
 import java.time.Instant;
 
 /**
- *
+ * Classe qui représente un message envoyé par un client
  */
 final public class Message {
     private final String senderName;
@@ -19,13 +19,13 @@ final public class Message {
     private static final int MAXIMUM_SIZE = 200;
 
     /**
-     *
-     * @param senderName
-     * @param senderIp
-     * @param senderPort
-     * @param time
-     * @param message
-     * @throws MessageSizeException
+     * Constructeur par défaut
+     * @param senderName            l'utilisateur qui envoie le message
+     * @param senderIp              l'adresse ip de l'utilisateur qui envoie le message
+     * @param senderPort            le port de l'utilisateur qui envoie le message
+     * @param time                  l'instant de l'envoi du message
+     * @param message               le message envoyé
+     * @throws MessageSizeException lorsque la taille du message excède la taille maximale
      */
     public Message(String senderName, String senderIp, Integer senderPort, Instant time, String message)
             throws MessageSizeException {
@@ -40,49 +40,29 @@ final public class Message {
         this.message = message;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getSenderName() {
         return senderName;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getSenderIp() {
         return senderIp;
     }
 
-    /**
-     *
-     * @return
-     */
     public Integer getSenderPort() {
         return senderPort;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getTime() {
         return time;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getMessage() {
         return message;
     }
 
     /**
-     *
-     * @return
+     * Encode le message dans un format JSON
+     * @return le message encodé
      */
     public String encodeMessage() {
         Gson gson = new Gson();
@@ -90,9 +70,9 @@ final public class Message {
     }
 
     /**
-     *
-     * @param string
-     * @return
+     * Décode le message en format JSON
+     * @param string le message encodé
+     * @return       le message décodé
      */
     public static Message decodeMessage(String string) {
         Gson gson = new Gson();

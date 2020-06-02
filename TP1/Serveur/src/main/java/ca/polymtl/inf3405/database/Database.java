@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Classe qui permet l'accès à la base de données SQLite.
  */
 public class Database {
     private static volatile Database instance;
@@ -22,7 +22,8 @@ public class Database {
     private static final String path = "messenger.sqlite";
 
     /**
-     *
+     * Constructeur privé (Singleton) qui vérifie la capacité d'effectuer une connection avec le fichier contenant la
+     * base de données.
      */
     private Database() {
         Connection connection = null;
@@ -47,8 +48,8 @@ public class Database {
     }
 
     /**
-     *
-     * @return
+     * Getter permettant d'avoir une instance de la base de données
+     * @return l'instance de la base de données
      */
     public static Database getInstance() {
         if (instance == null) {
@@ -62,9 +63,9 @@ public class Database {
     }
 
     /**
-     *
-     * @param m
-     * @throws DatabaseInsertionException
+     * Méthode permettant l'insertion d'un nouveau message dans la base de données
+     * @param m                            le message  à insérer
+     * @throws DatabaseInsertionException  lorsqu'il y a une erreur d'insertion
      */
     public synchronized void insertNewMessage(Message m) throws DatabaseInsertionException {
         Connection connection = null;
@@ -89,9 +90,9 @@ public class Database {
     }
 
     /**
-     *
-     * @param u
-     * @throws DatabaseInsertionException
+     * Méthode permettant l'insertion d'un nouveau utilisateur dans la base de données
+     * @param u                            l'utilisateur à ajouter
+     * @throws DatabaseInsertionException  lorsqu'il y a une erreur d'insertion
      */
     public synchronized void insertNewUser(User u) throws DatabaseInsertionException {
         Connection connection = null;
@@ -115,10 +116,10 @@ public class Database {
     }
 
     /**
-     *
-     * @param username
-     * @return
-     * @throws NoUserException
+     * Méthode permettant d'obtenir un utilisateur stocké dans la base de données
+     * @param username          le nom de l'utilisateur à trouver
+     * @return                  l'utilisateur trouvé
+     * @throws NoUserException  lorsque l'utilisateur n'existe pas
      */
     public synchronized User getUser(String username) throws NoUserException {
         Connection connection = null;
@@ -149,9 +150,9 @@ public class Database {
     }
 
     /**
-     *
-     * @param numberOfMessages
-     * @return
+     * Méthode qui permet de récupérer un nombre d'anciens messages dans la base de données
+     * @param numberOfMessages le nombre de messages à retourner
+     * @return                 les messages
      */
     public synchronized List<Message> getLastMessages(Integer numberOfMessages) {
         Connection connection = null;
