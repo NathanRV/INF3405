@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- *
+ * Thread Serveur
  */
 public class Serveur extends Thread {
     private volatile static ConcurrentMap<String, ConnectedUser> connectedUsers;
@@ -22,7 +22,7 @@ public class Serveur extends Thread {
     private boolean serverRunning;
 
     /**
-     *
+     * Constructeur serveur
      */
     public Serveur() {
         connectedUsers = new ConcurrentHashMap<>();
@@ -31,15 +31,16 @@ public class Serveur extends Thread {
     }
 
     /**
-     *
-     * @return
+     * Accesseurs de serverRunning
+     * @return boolean : serverRunning
      */
     public boolean getServerRunning() {
         return serverRunning;
     }
 
     /**
-     *
+     * Fonctions permettant de lancer les validations initiales
+     * et d'initialiser le socket d'ecoute.
      */
     private void initiateServer() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -54,14 +55,16 @@ public class Serveur extends Thread {
         } catch (Exception e) {
         }
 
-        System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
+        System.out.format("L'adresse et le port du serveur sont %s:%d%n", serverAddress, serverPort);
         serverRunning = true;
     }
 
     /**
+     * Fonctions permettant de valider l'adresse IP entre
+     * sur la console.
      *
-     * @param reader
-     * @return
+     * @param reader : BufferedReader (Entree du texte)
+     * @return String : Adresse IP valide.
      */
     private String validateIP(BufferedReader reader) {
         System.out.print("Veuillez entrez l'adresse IP du serveur : ");
@@ -84,9 +87,11 @@ public class Serveur extends Thread {
     }
 
     /**
+     * Fonctions permettant de valider le port entre sur
+     * la console.
      *
-     * @param reader
-     * @return
+     * @param reader : BufferedReader (Entree du texte)
+     * @return int : Port valide
      */
     private int validatePort(BufferedReader reader) {
         System.out.print("Veuillez entrez le port d'ecoute du serveur : ");
@@ -109,7 +114,7 @@ public class Serveur extends Thread {
     }
 
     /**
-     *
+     * Fonction permettant de fermer le socket d'ecoute.
      */
     public void closeSocket() {
         try {
@@ -119,7 +124,7 @@ public class Serveur extends Thread {
     }
 
     /**
-     *
+     * Fonctions permettant d'accepter les nouveaux clients.
      */
     public void run() {
         initiateServer();
@@ -141,7 +146,7 @@ public class Serveur extends Thread {
     }
 
     /**
-     *
+     * Thread de gestion de clients
      */
     private class ClientHandler extends Thread {
         private Socket socket;
@@ -152,10 +157,11 @@ public class Serveur extends Thread {
         private volatile BlockingQueue<Message> messagesQueue;
 
         /**
+         * Constructeur de gestionnaire client
          *
-         * @param socket
-         * @param connectedUsers
-         * @param messagesQueue
+         * @param socket : Socket (Port de connexion)
+         * @param connectedUsers : ConcurrentMap<String, ConnectedUser>
+         * @param messagesQueue : BlockingQueue<Message>
          */
         public ClientHandler(Socket socket, ConcurrentMap<String, ConnectedUser> connectedUsers,
                              BlockingQueue<Message> messagesQueue) {
@@ -171,7 +177,7 @@ public class Serveur extends Thread {
         }
 
         /**
-         *
+         * Fonctions permettant de recevoir les requetes.
          */
         public void run() {
             try {
@@ -182,8 +188,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonctions de gestions des requetes.
          *
-         * @param request
+         * @param request : Request (requete)
          */
         private void processRequest(Request request) {
             switch (request.getRequest()) {
@@ -205,8 +212,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Gestion requete de connexion.
          *
-         * @param request
+         * @param request : Request (requete)
          */
         private void processLogIn(Request request) {
             String username = request.getPayload().get("username");
@@ -244,11 +252,12 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonction de creation de nouveau utilisateur.
          *
-         * @param request
-         * @param username
-         * @param password
-         * @param port
+         * @param request : Request (requete)
+         * @param username : String (nom d'utilisateur)
+         * @param password : String (mot de passe)
+         * @param port : int (Port de connexion)
          */
         private void processNewUser(Request request, String username, String password, int port) {
             User user = new User(username);
@@ -266,8 +275,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonction de gestion requete de deconnexion.
          *
-         * @param request
+         * @param request : Request (requete)
          */
         private void processLogOut(Request request) {
             String token = request.getToken();
@@ -281,8 +291,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonction gestion requete nouveau message.
          *
-         * @param request
+         * @param request : Request (requete)
          */
         private void processNewMessage(Request request) {
             ConnectedUser connectedUser = connectedUsers.get(request.getToken());
@@ -306,8 +317,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonction de gestion requete d'anciens messages.
          *
-         * @param request
+         * @param request : Request (requete)
          */
         private void processMessagesRequest(Request request) {
             ConnectedUser connectedUser = connectedUsers.get(request.getToken());
@@ -329,8 +341,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonction d'envoi de message d'erreur.
          *
-         * @param payload
+         * @param payload : Map<String, String>
          */
         private void sendErrorResponse(Map<String, String> payload) {
             Response response = new Response("ERROR", payload);
@@ -338,8 +351,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonction d'envoi de reponse.
          *
-         * @param response
+         * @param response : Response (reponse)
          */
         private void sendResponse(Response response) {
             try {
@@ -351,7 +365,7 @@ public class Serveur extends Thread {
     }
 
     /**
-     *
+     * Thread de gestion de message.
      */
     private class MessageHandler extends Thread {
         private volatile ConcurrentMap<String, ConnectedUser> connectedUsers;
@@ -360,9 +374,10 @@ public class Serveur extends Thread {
         private Database database;
 
         /**
+         * Constructeur de gestionnaire de message.
          *
-         * @param connectedUsers
-         * @param messagesQueue
+         * @param connectedUsers : ConcurrentMap<String,ConnectedUser>
+         * @param messagesQueue : BlockingQueue<Message>
          */
         public MessageHandler(ConcurrentMap<String, ConnectedUser> connectedUsers,
                               BlockingQueue<Message> messagesQueue) {
@@ -372,7 +387,8 @@ public class Serveur extends Thread {
         }
 
         /**
-         *
+         * Fonction run cherchant message
+         * dans la queue et appellant sendMessage.
          */
         public void run() {
             Message message;
@@ -386,8 +402,9 @@ public class Serveur extends Thread {
         }
 
         /**
+         * Fonction d'envoi de message.
          *
-         * @param message
+         * @param message : Message
          */
         private void sendMessage(Message message) {
             Map<String, ConnectedUser> users = Collections.unmodifiableMap(connectedUsers);
@@ -411,7 +428,7 @@ public class Serveur extends Thread {
         }
 
         /**
-         *
+         * Fonction permettant d'arrêter le thread.
          */
         public void terminate() {
             running = false;
@@ -419,17 +436,26 @@ public class Serveur extends Thread {
     }
 
     /**
-     *
+     * Thread d'envoi de message.
      */
     private class MessageSender extends Thread {
         private final ConnectedUser user;
         private final Message message;
 
+        /**
+         * Constructeur du thread.
+         *
+         * @param user : ConnectedUser
+         * @param message : Message
+         */
         MessageSender(ConnectedUser user, Message message) {
             this.user = user;
             this.message = message;
         }
 
+        /**
+         * Fonction qui envoie le message.
+         */
         public void run() {
             try {
                 Socket socket = new Socket(user.getUserAddress(), user.getUserPort());
@@ -441,6 +467,8 @@ public class Serveur extends Thread {
     }
 
     /**
+     * Fonction principale offrant menu pour
+     * fermer le programme ou le relancer.
      *
      * @param args
      * @throws Exception
@@ -466,7 +494,7 @@ public class Serveur extends Thread {
             }
             System.out.println(
                     "Fermer le programme: quit\n" +
-                            "Restart server: restart"
+                            "Relancer serveur: restart"
             );
             choice = reader.readLine();
         }
