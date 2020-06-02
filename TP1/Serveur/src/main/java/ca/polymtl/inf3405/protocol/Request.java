@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Classe qui représente une requête du client au serveur
  */
 public class Request {
     private final String request;
@@ -14,10 +14,10 @@ public class Request {
     private final Map<String, String> payload;
 
     /**
-     *
-     * @param request
-     * @param token
-     * @param payload
+     * Constructeur par défaut
+     * @param request  la requête
+     * @param token    le token d'authentification
+     * @param payload  les données complémentaires à la requête
      */
     public Request(String request, String token, Map<String, String> payload) {
         this.request = request;
@@ -25,33 +25,21 @@ public class Request {
         this.payload = payload;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getRequest() {
         return request;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getToken() {
         return token;
     }
 
-    /**
-     *
-     * @return
-     */
     public Map<String, String> getPayload() {
         return payload;
     }
 
     /**
-     *
-     * @return
+     * Méthode qui encode là requête en format JSON
+     * @return  la requête encodée
      */
     public String encodeRequest() {
         Gson gson = new Gson();
@@ -59,9 +47,9 @@ public class Request {
     }
 
     /**
-     *
-     * @param json
-     * @return
+     * Méthode qui décode une requête en format JSON
+     * @param json  la requête encodée
+     * @return      la requête décodée
      */
     public static Request decodeRequest(String json) {
         Gson gson = new Gson();
