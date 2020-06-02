@@ -10,6 +10,7 @@ import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -275,7 +276,7 @@ public class Client {
          */
         public void run() {
             try {
-                Message message = new Message(username, serverAddress, serverPort, Instant.now(), inputMessage);
+                Message message = new Message(username, serverAddress, serverPort, new Date(), inputMessage);
                 Map<String, String> requestPayload = Map.of("Message", message.encodeMessage());
                 sendRequest(serverAddress, serverPort, "NEW_MESSAGE", requestPayload);
             } catch (MessageSizeException e) {
