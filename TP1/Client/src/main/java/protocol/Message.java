@@ -6,7 +6,6 @@ import exceptions.MessageSizeException;
 
 import javax.swing.text.StyleContext;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -18,6 +17,8 @@ final public class Message {
     private final Integer senderPort;
     private final String time;
     private final String message;
+    protected final static String pattern = "yyyy-MM-dd@HH:mm:ss";
+    protected final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
     private static final int MAXIMUM_SIZE = 200;
 
@@ -30,7 +31,7 @@ final public class Message {
      * @param message               le message envoyé
      * @throws MessageSizeException lorsque la taille du message excède la taille maximale
      */
-    public Message(String senderName, String senderIp, Integer senderPort, Instant time, String message)
+    public Message(String senderName, String senderIp, Integer senderPort, Date time, String message)
             throws MessageSizeException {
         if (message.length() > MAXIMUM_SIZE) {
             throw new MessageSizeException("La taille maximale du message est de 200 caractères.");
@@ -39,7 +40,7 @@ final public class Message {
         this.senderName = senderName;
         this.senderIp = senderIp;
         this.senderPort = senderPort;
-        this.time = time.toString();
+        this.time = simpleDateFormat.format(time);
         this.message = message;
     }
 
@@ -75,7 +76,7 @@ final public class Message {
     /**
      * Décode le message en format JSON
      * @param string le message encodé
-     * @return       le message décodé
+     * @return le message décodé
      */
     public static Message decodeMessage(String string) {
         Gson gson = new Gson();
